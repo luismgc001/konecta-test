@@ -1,0 +1,37 @@
+-- Crear tabla de usuarios
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    rol VARCHAR(20) NOT NULL CHECK (rol IN ('empleado', 'administrador')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Crear tabla de empleados
+CREATE TABLE empleados (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    telefono VARCHAR(20),
+    fecha_contratacion DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Crear tabla de solicitudes
+CREATE TABLE solicitudes (
+    id SERIAL PRIMARY KEY,
+    empleado_id INTEGER REFERENCES empleados(id),
+    tipo_solicitud VARCHAR(50) NOT NULL,
+    descripcion TEXT,
+    estado VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_resolucion TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insertar un usuario administrador de prueba
+INSERT INTO usuarios (username, password, rol) 
+VALUES ('admin', '$2b$10$yourhashedpassword', 'administrador');
