@@ -1,21 +1,12 @@
+require("dotenv").config();
 const { Pool } = require("pg");
 
-const config = process.env.DATABASE_URL
-  ? {
-      connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false, // Necesario para conexiones SSL a Supabase
-      },
-    }
-  : {
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD,
-      port: process.env.DB_PORT,
-    };
-
-const pool = new Pool(config);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
 // Verificar conexión
 pool.on("connect", () => {
@@ -26,4 +17,18 @@ pool.on("error", (err) => {
   console.error("Error inesperado en el pool de conexiones:", err);
 });
 
-module.exports = pool;
+// Función helper para ejecutar queries
+const query = async (text, params) => {
+  try {
+    const res = await pool.query(text, params);
+    return res;
+  } catch (error) {
+    console.error("Error ejecutando query", { text, error });
+    throw error;
+  }
+};
+
+module.exports = {
+  pool,
+  query,
+};
