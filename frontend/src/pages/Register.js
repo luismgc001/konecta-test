@@ -1,7 +1,8 @@
 // src/pages/Register.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,6 +19,16 @@ const Register = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { auth } = useAuth();
+  const isAdmin = auth?.user?.rol === "administrador";
+
+  useEffect(() => {
+    if (!isAdmin) {
+      navigate("/dashboard");
+    }
+  }, [isAdmin, navigate]);
+
+  if (!isAdmin) return null;
 
   const handleChange = (e) => {
     setFormData({

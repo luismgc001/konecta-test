@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { Link } from "react-router-dom";
+import RegisterModal from "../components/RegisterModal";
 
 const Dashboard = () => {
   const { auth } = useAuth();
@@ -15,31 +16,31 @@ const Dashboard = () => {
   const [solicitudesRecientes, setSolicitudesRecientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      // Para administradores: obtener estadísticas generales
+      if (isAdmin) {
+        const [statsResponse, solicitudesResponse] = await Promise.all([
+          api("/solicitudes/stats"),
+          api("/solicitudes/recientes"),
+        ]);
+        setStats(statsResponse);
+        setSolicitudesRecientes(solicitudesResponse.data);
+      } else {
+        // Para empleados: obtener solo sus solicitudes
+        const response = await api("/solicitudes/mis-solicitudes");
+        setSolicitudesRecientes(response.data);
+      }
+    } catch (err) {
+      setError("Error al cargar los datos del dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        // Para administradores: obtener estadísticas generales
-        if (isAdmin) {
-          const [statsResponse, solicitudesResponse] = await Promise.all([
-            api("/solicitudes/stats"),
-            api("/solicitudes/recientes"),
-          ]);
-          setStats(statsResponse);
-          setSolicitudesRecientes(solicitudesResponse.data);
-        } else {
-          // Para empleados: obtener solo sus solicitudes
-          const response = await api("/solicitudes/mis-solicitudes");
-          setSolicitudesRecientes(response.data);
-        }
-      } catch (err) {
-        setError("Error al cargar los datos del dashboard");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboardData();
   }, [isAdmin]);
 
@@ -179,18 +180,29 @@ const Dashboard = () => {
               >
                 Ver Pendientes
               </button>
-              <button
-                className="p-3 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                onClick={() => {
-                  /* manejar acción */
-                }}
-              >
-                Registrar Empleado
-              </button>
+              {isAdmin && (
+                <>
+                  <button
+                    className="p-3 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+                    onClick={() => setIsRegisterModalOpen(true)}
+                  >
+                    Registrar Empleado
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
       </div>
+      {/* Agrega el modal al final del componente */}
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSuccess={() => {
+          // Recargar los datos del dashboard si es necesario
+          fetchDashboardData();
+        }}
+      />
     </div>
   );
 };

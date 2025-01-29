@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layout";
 import Loading from "./components/Loading";
+import ProtectedAdminRoute from "./components/ProtectedRoute";
 
 // Lazy loaded components
 const Login = React.lazy(() => import("./pages/Login"));
@@ -18,7 +19,14 @@ function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route
+              path="/register"
+              element={
+                <ProtectedAdminRoute>
+                  <Register />
+                </ProtectedAdminRoute>
+              }
+            />
             <Route path="/" element={<Layout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
