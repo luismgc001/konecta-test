@@ -1,3 +1,6 @@
+const { app } = require("../index"); // Asegúrate de que tu app.js exporta { app }
+const request = require("supertest");
+
 describe("Empleados Endpoints", () => {
   let authToken;
 
@@ -5,8 +8,9 @@ describe("Empleados Endpoints", () => {
     // Obtener token para pruebas
     const loginRes = await request(app).post("/api/auth/login").send({
       username: "admin",
-      password: "admin123",
+      password: "admin",
     });
+    console.log("Token recibido:", loginRes.body.token);
     authToken = loginRes.body.token;
   });
 

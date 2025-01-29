@@ -1,6 +1,6 @@
 const request = require("supertest");
-const { app } = require("../index"); // Asegúrate de que tu app.js exporta { app }
-const pool = require("../src/config/database");
+const { app } = require("../index");
+const { pool } = require("../src/config/database");
 
 describe("Auth Endpoints", () => {
   // Datos de prueba
