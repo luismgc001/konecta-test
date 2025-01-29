@@ -76,7 +76,7 @@ const Dashboard = () => {
 
         {isAdmin && (
           <Link
-            to="/empleados"
+            to="/Employees"
             className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
           >
             <h2 className="text-lg font-semibold mb-2">Gestión de Empleados</h2>

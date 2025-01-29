@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/LoadingSpinner";
+import RegisterModal from "../components/RegisterModal";
 
 const Employees = () => {
   const { auth } = useAuth();
-  const isAdmin = auth?.user?.role === "admin";
+  const isAdmin = auth?.user?.rol === "administrador";
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,10 +16,12 @@ const Employees = () => {
     email: "",
     position: "",
   });
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   const fetchEmployees = async () => {
     try {
-      const response = await api(`/employees?page=${page}`);
+      const response = await api(`/empleados?page=${page}`);
+      console.log("EMPLEADOS RESP:", response);
       setEmployees(response.data);
     } catch (err) {
       setError("Error al cargar empleados");
@@ -36,7 +39,7 @@ const Employees = () => {
     if (!isAdmin) return;
 
     try {
-      await api("/employees", {
+      await api("/empleados", {
         method: "POST",
         body: JSON.stringify(newEmployee),
       });
@@ -52,6 +55,16 @@ const Employees = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Empleados</h1>
+      {isAdmin && (
+        <>
+          <button
+            className="p-3 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+            onClick={() => setIsRegisterModalOpen(true)}
+          >
+            Registrar Empleado
+          </button>
+        </>
+      )}
 
       {error && (
         <div className="bg-red-50 p-4 rounded mb-4">
@@ -59,52 +72,49 @@ const Employees = () => {
         </div>
       )}
 
-      {isAdmin && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-lg shadow mb-6"
-        >
-          <h2 className="text-lg font-semibold mb-4">Nuevo Empleado</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={newEmployee.name}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, name: e.target.value })
-              }
-              className="border rounded px-3 py-2"
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={newEmployee.email}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, email: e.target.value })
-              }
-              className="border rounded px-3 py-2"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Cargo"
-              value={newEmployee.position}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, position: e.target.value })
-              }
-              className="border rounded px-3 py-2"
-              required
-            />
-          </div>
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4">Acciones Rápidas</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <button
-            type="submit"
-            className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+            className="p-3 text-sm bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100"
+            onClick={() => {
+              /* manejar acción */
+            }}
           >
-            Agregar Empleado
+            Nueva Solicitud
           </button>
-        </form>
-      )}
+          {isAdmin && (
+            <>
+              <button
+                className="p-3 text-sm bg-green-50 text-green-600 rounded hover:bg-green-100"
+                onClick={() => {
+                  /* manejar acción */
+                }}
+              >
+                Aprobar Solicitudes
+              </button>
+              <button
+                className="p-3 text-sm bg-yellow-50 text-yellow-600 rounded hover:bg-yellow-100"
+                onClick={() => {
+                  /* manejar acción */
+                }}
+              >
+                Ver Pendientes
+              </button>
+              {isAdmin && (
+                <>
+                  <button
+                    className="p-3 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+                    onClick={() => setIsRegisterModalOpen(true)}
+                  >
+                    Registrar Empleado
+                  </button>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
 
       <div className="bg-white rounded-lg shadow">
         <table className="min-w-full">
@@ -118,7 +128,9 @@ const Employees = () => {
           <tbody>
             {employees.map((employee) => (
               <tr key={employee.id}>
-                <td className="px-6 py-4 border-b">{employee.name}</td>
+                <td className="px-6 py-4 border-b">
+                  {`${employee.nombre} ${employee.apellido}`}
+                </td>
                 <td className="px-6 py-4 border-b">{employee.email}</td>
                 <td className="px-6 py-4 border-b">{employee.position}</td>
               </tr>
@@ -143,6 +155,11 @@ const Employees = () => {
           Siguiente
         </button>
       </div>
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSuccess={() => {}}
+      />
     </div>
   );
 };
