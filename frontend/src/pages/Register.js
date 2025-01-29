@@ -6,10 +6,15 @@ import { api } from "../utils/api";
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    username: "",
     password: "",
     confirmPassword: "",
+    nombre: "",
+    apellido: "",
+    email: "",
+    telefono: "",
+    fecha_contratacion: new Date().toISOString().split("T")[0], // Fecha actual por defecto
+    rol: "empleado",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +36,10 @@ const Register = () => {
       setError("La contraseña debe tener al menos 6 caracteres");
       return false;
     }
+    if (formData.username.length < 4) {
+      setError("El nombre de usuario debe tener al menos 4 caracteres");
+      return false;
+    }
     return true;
   };
 
@@ -41,18 +50,37 @@ const Register = () => {
 
     setLoading(true);
     setError("");
+    console.log("Datos a enviar:", {
+      username: formData.username,
+      password: formData.password,
+      rol: formData.rol,
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      email: formData.email,
+      telefono: formData.telefono,
+      fecha_contratacion: formData.fecha_contratacion,
+    });
 
     try {
-      await api("/auth/register", {
+      const response = await api("/auth/register", {
         method: "POST",
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
+          username: formData.username,
           password: formData.password,
+          rol: formData.rol, // Por defecto
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          email: formData.email,
+          telefono: formData.telefono,
+          fecha_contratacion: formData.fecha_contratacion,
         }),
       });
+      console.log("Respuesta registro: ", response);
 
-      navigate("/login");
+      // Si el registro es exitoso, redirigir al login
+      navigate("/login", {
+        state: { message: "Registro exitoso. Por favor inicia sesión." },
+      });
     } catch (err) {
       setError(err.message || "Error al registrar usuario");
     } finally {
@@ -76,17 +104,47 @@ const Register = () => {
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="name" className="sr-only">
-                Nombre
+              <label htmlFor="username" className="sr-only">
+                Nombre de Usuario
               </label>
               <input
-                id="name"
-                name="name"
+                id="username"
+                name="username"
                 type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Nombre completo"
-                value={formData.name}
+                placeholder="Nombre de usuario"
+                value={formData.username}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="nombre" className="sr-only">
+                Nombre
+              </label>
+              <input
+                id="nombre"
+                name="nombre"
+                type="text"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Nombre"
+                value={formData.nombre}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="apellido" className="sr-only">
+                Apellido
+              </label>
+              <input
+                id="apellido"
+                name="apellido"
+                type="text"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Apellido"
+                value={formData.apellido}
                 onChange={handleChange}
               />
             </div>
@@ -104,6 +162,51 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
               />
+            </div>
+            <div>
+              <label htmlFor="telefono" className="sr-only">
+                Teléfono
+              </label>
+              <input
+                id="telefono"
+                name="telefono"
+                type="tel"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Teléfono"
+                value={formData.telefono}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="fecha_contratacion" className="sr-only">
+                Fecha de Contratación
+              </label>
+              <input
+                id="fecha_contratacion"
+                name="fecha_contratacion"
+                type="date"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                value={formData.fecha_contratacion}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="rol" className="sr-only">
+                Rol
+              </label>
+              <select
+                id="rol"
+                name="rol"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                value={formData.rol}
+                onChange={handleChange}
+              >
+                <option value="empleado">Empleado</option>
+                <option value="administrador">Administrador</option>
+              </select>
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
@@ -143,7 +246,7 @@ const Register = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              {loading ? "Cargando..." : "Registrarse"}
+              {loading ? "Registrando..." : "Registrarse"}
             </button>
           </div>
         </form>
