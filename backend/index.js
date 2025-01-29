@@ -19,7 +19,14 @@ const app = express();
 app.use(helmetConfig);
 app.use(limiter);
 app.use(sanitizeData);
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3001", // URL de tu frontend (ajusta el puerto según corresponda)
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 // Rutas

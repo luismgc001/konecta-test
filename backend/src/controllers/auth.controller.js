@@ -38,7 +38,6 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-
     // Buscar usuario
     const result = await pool.query(
       "SELECT * FROM usuarios WHERE username = $1",
