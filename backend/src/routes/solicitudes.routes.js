@@ -133,4 +133,42 @@ router.patch("/:id/estado", authMiddleware, isAdmin, async (req, res) => {
   }
 });
 
+// solicitudes.routes.js
+// Ruta para estadísticas
+router.get("/stats", authMiddleware, async (req, res) => {
+  try {
+    const stats = await pool.query(`
+      SELECT 
+        (SELECT COUNT(*) FROM solicitudes) as total_solicitudes,
+        (SELECT COUNT(*) FROM solicitudes WHERE estado = 'pendiente') as solicitudes_pendientes,
+        (SELECT COUNT(*) FROM empleados) as total_empleados
+    `);
+
+    res.json({
+      totalSolicitudes: parseInt(stats.rows[0].total_solicitudes),
+      solicitudesPendientes: parseInt(stats.rows[0].solicitudes_pendientes),
+      totalEmpleados: parseInt(stats.rows[0].total_empleados),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Ruta para solicitudes recientes
+router.get("/recientes", authMiddleware, async (req, res) => {
+  try {
+    const query = `
+      SELECT s.*, e.nombre, e.apellido 
+      FROM solicitudes s 
+      JOIN empleados e ON s.empleado_id = e.id 
+      ORDER BY s.fecha_solicitud DESC 
+      LIMIT 5
+    `;
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
