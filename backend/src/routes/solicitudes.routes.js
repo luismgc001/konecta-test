@@ -92,9 +92,6 @@ router.post("/", authMiddleware, async (req, res) => {
 
     // Usamos el id de la tabla empleados para la relación en solicitudes
     const empleado_id = empleadoResult.rows[0].id;
-    console.log("ID empleado a insertar:", empleado_id);
-    console.log("usuario_id relacionado:", empleadoResult.rows[0].usuario_id);
-
     const result = await pool.query(
       `INSERT INTO solicitudes (
         empleado_id,

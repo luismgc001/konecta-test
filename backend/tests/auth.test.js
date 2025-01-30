@@ -3,15 +3,19 @@ const { app } = require("../index");
 const { pool } = require("../src/config/database");
 
 describe("Auth Endpoints", () => {
-  // Datos de prueba
   const testUser = {
-    username: "testuser",
-    password: "password123",
-    rol: "empleado",
+    username: "test",
+    password: "test",
+    rol: "administrador",
+    nombre: "Test",
+    apellido: "User",
+    email: "test@example.com",
+    telefono: "+1234567890",
+    fecha_contratacion: "2024-01-30",
+    salario: 50000,
   };
 
   beforeAll(async () => {
-    // Limpiar datos de prueba anteriores
     try {
       await pool.query("DELETE FROM usuarios WHERE username = $1", [
         testUser.username,
@@ -23,11 +27,9 @@ describe("Auth Endpoints", () => {
 
   afterAll(async () => {
     try {
-      // Limpiar datos de prueba
       await pool.query("DELETE FROM usuarios WHERE username = $1", [
         testUser.username,
       ]);
-      // Cerrar la conexión
       await pool.end();
     } catch (error) {
       console.error("Error en la limpieza final:", error);
@@ -43,6 +45,22 @@ describe("Auth Endpoints", () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("user");
       expect(response.body.user.username).toBe(testUser.username);
+      // Verificar campos adicionales
+      expect(response.body.user).toHaveProperty("rol", "empleado");
+    });
+
+    it("should not register a user with missing required fields", async () => {
+      const incompleteUser = {
+        username: "incomplete",
+        password: "password123",
+      };
+
+      const response = await request(app)
+        .post("/api/auth/register")
+        .send(incompleteUser);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("errors");
     });
 
     it("should not register a duplicate user", async () => {
@@ -63,6 +81,8 @@ describe("Auth Endpoints", () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("token");
+      expect(response.body).toHaveProperty("user");
+      expect(response.body.user).toHaveProperty("rol");
     });
 
     it("should fail with incorrect password", async () => {

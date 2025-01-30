@@ -6,10 +6,9 @@ const register = async (req, res) => {
   try {
     await pool.query("BEGIN");
 
-    const {
+    let {
       username,
       password,
-      rol = rol || "empleado",
       nombre,
       apellido,
       email,
@@ -17,6 +16,34 @@ const register = async (req, res) => {
       fecha_contratacion,
       salario,
     } = req.body;
+
+    const rol = req.body.rol ?? "empleado";
+
+    const requiredFields = [
+      "username",
+      "password",
+      "nombre",
+      "apellido",
+      "email",
+      "telefono",
+      "fecha_contratacion",
+      "salario",
+    ];
+
+    const rolesPermitidos = ["empleado", "administrador"];
+    if (rol && !rolesPermitidos.includes(rol)) {
+      return res.status(400).json({
+        message: "Datos inválidos",
+        errors: ["El rol especificado no es válido"],
+      });
+    }
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: "Faltan campos requeridos",
+        errors: missingFields.map((field) => `El campo ${field} es requerido`),
+      });
+    }
 
     const salarioNumerico = parseFloat(salario);
     if (isNaN(salarioNumerico)) {

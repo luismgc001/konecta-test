@@ -16,18 +16,19 @@ const solicitudesRoutes = require("./src/routes/solicitudes.routes");
 const app = express();
 
 // Middlewares
-app.use(helmetConfig);
-app.use(limiter);
-app.use(sanitizeData);
 app.use(
   cors({
-    origin: ["http://localhost:3001"], // URL específica del frontend
+    origin: ["http://localhost:3001"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
     optionsSuccessStatus: 200,
   })
 );
+app.options("*", cors());
+app.use(helmetConfig);
+app.use(limiter);
+app.use(sanitizeData);
 app.use(express.json());
 
 // Rutas
