@@ -11,11 +11,6 @@ const Employees = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
-  const [newEmployee, setNewEmployee] = useState({
-    name: "",
-    email: "",
-    position: "",
-  });
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   const fetchEmployees = async () => {
@@ -33,22 +28,6 @@ const Employees = () => {
   useEffect(() => {
     fetchEmployees();
   }, [page]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!isAdmin) return;
-
-    try {
-      await api("/empleados", {
-        method: "POST",
-        body: JSON.stringify(newEmployee),
-      });
-      setNewEmployee({ name: "", email: "", position: "" });
-      fetchEmployees();
-    } catch (err) {
-      setError("Error al crear empleado");
-    }
-  };
 
   if (loading) return <LoadingSpinner size="lg" />;
 

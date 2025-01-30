@@ -61,7 +61,7 @@ const RegisterModal = ({ isOpen, onClose, onSuccess }) => {
           email: formData.email,
           telefono: formData.telefono,
           fecha_contratacion: formData.fecha_contratacion,
-          salario: parseInt(formData.salario),
+          salario: parseFloat(formData.salario) || 0,
         }),
       });
 
@@ -202,9 +202,10 @@ const RegisterModal = ({ isOpen, onClose, onSuccess }) => {
             <input
               type="number"
               name="salario"
-              step="0.01"
+              step="1" // Para pesos colombianos
               min="0"
               required
+              placeholder="Ingrese el salario"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               value={formData.salario}
               onChange={handleChange}
