@@ -3,35 +3,70 @@ const router = express.Router();
 const { authMiddleware, isAdmin } = require("../middlewares/auth.middleware");
 const pool = require("../config/database");
 
-// Obtener todas las solicitudes (accesible para todos los usuarios autenticados)
-// solicitudes.routes.js
-// En solicitudes.routes.js
+// Obtener todas las solicitudes
 router.get("/", authMiddleware, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
     const isAdmin = req.user.rol === "administrador";
-    let query;
+    let queryBase;
+    let countQuery;
     let values = [];
+    let countValues = [];
 
     if (isAdmin) {
-      query = `
+      queryBase = `
         SELECT s.*, e.nombre, e.apellido, e.usuario_id 
         FROM solicitudes s 
         JOIN empleados e ON s.empleado_id = e.id 
         ORDER BY s.fecha_solicitud DESC
       `;
+      countQuery = `
+        SELECT COUNT(*) 
+        FROM solicitudes s 
+        JOIN empleados e ON s.empleado_id = e.id
+      `;
     } else {
-      query = `
+      queryBase = `
         SELECT s.*, e.nombre, e.apellido, e.usuario_id 
         FROM solicitudes s 
         JOIN empleados e ON s.empleado_id = e.id 
         WHERE e.usuario_id = $1
         ORDER BY s.fecha_solicitud DESC
       `;
-      values = [req.user.id];
+      countQuery = `
+        SELECT COUNT(*) 
+        FROM solicitudes s 
+        JOIN empleados e ON s.empleado_id = e.id 
+        WHERE e.usuario_id = $1
+      `;
+      values.push(req.user.id);
+      countValues.push(req.user.id);
     }
 
-    const result = await pool.query(query, values);
-    res.json(result.rows);
+    // Agregar paginación al query base
+    queryBase += ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+    values.push(limit, offset);
+
+    // Ejecutar ambos queries
+    const [result, countResult] = await Promise.all([
+      pool.query(queryBase, values),
+      pool.query(countQuery, countValues),
+    ]);
+
+    const total = parseInt(countResult.rows[0].count);
+
+    res.json({
+      data: result.rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

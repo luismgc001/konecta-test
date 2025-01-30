@@ -105,4 +105,36 @@ router.post("/", authMiddleware, isAdmin, async (req, res) => {
   }
 });
 
+// Añadir esta nueva ruta en empleados.routes.js
+
+// Eliminar empleado (solo administradores)
+router.delete("/:id", authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Primero verificamos si el empleado existe
+    const empleado = await pool.query("SELECT * FROM empleados WHERE id = $1", [
+      id,
+    ]);
+
+    if (empleado.rows.length === 0) {
+      return res.status(404).json({ message: "Empleado no encontrado" });
+    }
+
+    // Realizamos la eliminación
+    await pool.query("DELETE FROM empleados WHERE id = $1", [id]);
+
+    res.json({ message: "Empleado eliminado correctamente" });
+  } catch (error) {
+    // Si hay error de llave foránea, enviamos un mensaje más amigable
+    if (error.code === "23503") {
+      return res.status(400).json({
+        message:
+          "No se puede eliminar el empleado porque tiene registros asociados",
+      });
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
