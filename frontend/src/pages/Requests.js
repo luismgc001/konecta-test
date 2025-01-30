@@ -5,7 +5,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 
 const Requests = () => {
   const { auth } = useAuth();
-  const isAdmin = auth?.user?.role === "admin";
+  const isAdmin = auth?.user?.role === "administrador";
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

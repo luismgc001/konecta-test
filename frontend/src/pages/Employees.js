@@ -51,50 +51,6 @@ const Employees = () => {
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Acciones Rápidas</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button
-            className="p-3 text-sm bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100"
-            onClick={() => {
-              /* manejar acción */
-            }}
-          >
-            Nueva Solicitud
-          </button>
-          {isAdmin && (
-            <>
-              <button
-                className="p-3 text-sm bg-green-50 text-green-600 rounded hover:bg-green-100"
-                onClick={() => {
-                  /* manejar acción */
-                }}
-              >
-                Aprobar Solicitudes
-              </button>
-              <button
-                className="p-3 text-sm bg-yellow-50 text-yellow-600 rounded hover:bg-yellow-100"
-                onClick={() => {
-                  /* manejar acción */
-                }}
-              >
-                Ver Pendientes
-              </button>
-              {isAdmin && (
-                <>
-                  <button
-                    className="p-3 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                    onClick={() => setIsRegisterModalOpen(true)}
-                  >
-                    Registrar Empleado
-                  </button>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
       <div className="bg-white rounded-lg shadow">
         <table className="min-w-full">
           <thead>
