@@ -122,7 +122,8 @@ const Employees = () => {
             <tr>
               <th className="px-6 py-3 border-b text-left">Nombre</th>
               <th className="px-6 py-3 border-b text-left">Email</th>
-              <th className="px-6 py-3 border-b text-left">Cargo</th>
+              <th className="px-6 py-3 border-b text-left">Telefono</th>
+              <th className="px-6 py-3 border-b text-left">Salario</th>
             </tr>
           </thead>
           <tbody>
@@ -132,7 +133,13 @@ const Employees = () => {
                   {`${employee.nombre} ${employee.apellido}`}
                 </td>
                 <td className="px-6 py-4 border-b">{employee.email}</td>
-                <td className="px-6 py-4 border-b">{employee.position}</td>
+                <td className="px-6 py-4 border-b">{employee.telefono}</td>
+                <td className="px-6 py-4 border-b text-right">
+                  {new Intl.NumberFormat("es-CO", {
+                    style: "currency",
+                    currency: "COP",
+                  }).format(employee.salario)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -158,7 +165,10 @@ const Employees = () => {
       <RegisterModal
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}
-        onSuccess={() => {}}
+        onSuccess={() => {
+          fetchEmployees(); // Actualiza la lista de empleados
+          setIsRegisterModalOpen(false); // Cierra el modal
+        }}
       />
     </div>
   );

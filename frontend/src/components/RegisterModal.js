@@ -1,6 +1,5 @@
 // src/components/RegisterModal.js
 import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { api } from "../utils/api";
 
 const RegisterModal = ({ isOpen, onClose, onSuccess }) => {
@@ -14,6 +13,7 @@ const RegisterModal = ({ isOpen, onClose, onSuccess }) => {
     telefono: "",
     fecha_contratacion: new Date().toISOString().split("T")[0],
     rol: "empleado",
+    salario: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,6 +61,7 @@ const RegisterModal = ({ isOpen, onClose, onSuccess }) => {
           email: formData.email,
           telefono: formData.telefono,
           fecha_contratacion: formData.fecha_contratacion,
+          salario: parseInt(formData.salario),
         }),
       });
 
@@ -193,6 +194,21 @@ const RegisterModal = ({ isOpen, onClose, onSuccess }) => {
               <option value="empleado">Empleado</option>
               <option value="administrador">Administrador</option>
             </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Salario
+            </label>
+            <input
+              type="number"
+              name="salario"
+              step="0.01"
+              min="0"
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              value={formData.salario}
+              onChange={handleChange}
+            />
           </div>
 
           <div>
