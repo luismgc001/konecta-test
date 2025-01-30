@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { Link } from "react-router-dom";
-import RegisterModal from "../components/RegisterModal";
+import RequestModal from "../components/RequestModal"; // Asegúrate de importar el modal correcto
 
 const Dashboard = () => {
   const { auth } = useAuth();
@@ -16,23 +16,18 @@ const Dashboard = () => {
   const [solicitudesRecientes, setSolicitudesRecientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      // Para administradores: obtener estadísticas generales
-      if (isAdmin) {
-        const [statsResponse, solicitudesResponse] = await Promise.all([
-          api("/solicitudes/stats"),
-          api("/solicitudes/recientes"),
-        ]);
-        setStats(statsResponse);
-        setSolicitudesRecientes(solicitudesResponse.data);
-      } else {
-        // Para empleados: obtener solo sus solicitudes
-        const response = await api("/solicitudes/mis-solicitudes");
-        setSolicitudesRecientes(response.data);
-      }
+      const [statsResponse, solicitudesResponse] = await Promise.all([
+        api("/solicitudes/stats"),
+        api("/solicitudes/recientes"),
+      ]);
+
+      setStats(statsResponse);
+      setSolicitudesRecientes(solicitudesResponse || []);
     } catch (err) {
       setError("Error al cargar los datos del dashboard");
     } finally {
@@ -42,7 +37,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [isAdmin]);
+  }, []);
 
   if (loading) return <LoadingSpinner />;
 
@@ -58,16 +53,16 @@ const Dashboard = () => {
 
       {/* Tarjetas de acceso rápido */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Link
-          to="/solicitudes/nueva"
-          className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow text-left"
         >
           <h2 className="text-lg font-semibold mb-2">Nueva Solicitud</h2>
           <p className="text-gray-600">Crear una nueva solicitud</p>
-        </Link>
+        </button>
 
         <Link
-          to="/solicitudes"
+          to="/Requests"
           className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
         >
           <h2 className="text-lg font-semibold mb-2">Mis Solicitudes</h2>
@@ -116,6 +111,7 @@ const Dashboard = () => {
           <table className="min-w-full">
             <thead>
               <tr className="border-b">
+                <th className="text-left py-3">Solicitante</th>
                 <th className="text-left py-3">Tipo</th>
                 <th className="text-left py-3">Descripción</th>
                 <th className="text-left py-3">Estado</th>
@@ -125,6 +121,9 @@ const Dashboard = () => {
             <tbody>
               {solicitudesRecientes.map((solicitud) => (
                 <tr key={solicitud.id} className="border-b">
+                  <td className="py-3">
+                    {`${solicitud.nombre} ${solicitud.apellido}`}
+                  </td>
                   <td className="py-3">{solicitud.tipo_solicitud}</td>
                   <td className="py-3">{solicitud.descripcion}</td>
                   <td className="py-3">
@@ -150,57 +149,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Acciones Rápidas */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Acciones Rápidas</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button
-            className="p-3 text-sm bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100"
-            onClick={() => {
-              /* manejar acción */
-            }}
-          >
-            Nueva Solicitud
-          </button>
-          {isAdmin && (
-            <>
-              <button
-                className="p-3 text-sm bg-green-50 text-green-600 rounded hover:bg-green-100"
-                onClick={() => {
-                  /* manejar acción */
-                }}
-              >
-                Aprobar Solicitudes
-              </button>
-              <button
-                className="p-3 text-sm bg-yellow-50 text-yellow-600 rounded hover:bg-yellow-100"
-                onClick={() => {
-                  /* manejar acción */
-                }}
-              >
-                Ver Pendientes
-              </button>
-              {isAdmin && (
-                <>
-                  <button
-                    className="p-3 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                    onClick={() => setIsRegisterModalOpen(true)}
-                  >
-                    Registrar Empleado
-                  </button>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-      {/* Agrega el modal al final del componente */}
-      <RegisterModal
-        isOpen={isRegisterModalOpen}
-        onClose={() => setIsRegisterModalOpen(false)}
+      <RequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
-          // Recargar los datos del dashboard si es necesario
           fetchDashboardData();
+          setIsModalOpen(false);
         }}
       />
     </div>

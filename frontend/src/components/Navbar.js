@@ -1,18 +1,38 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isAdmin = auth?.user?.rol === "administrador";
+
+  console.log("NAV BAR: ", auth?.user);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  console.log("USUARIO NAV", auth);
+  // Función para determinar si un link está activo
+  const isLinkActive = (path) => {
+    return location.pathname === path;
+  };
+
+  // Componente NavLink con estilos condicionales
+  const NavLink = ({ to, children }) => (
+    <Link
+      to={to}
+      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+        isLinkActive(to)
+          ? "bg-indigo-700 text-white"
+          : "text-white hover:bg-indigo-500"
+      }`}
+    >
+      {children}
+    </Link>
+  );
 
   return (
     <nav className="bg-indigo-600">
@@ -24,50 +44,29 @@ const Navbar = () => {
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <Link
-                  to="/dashboard"
-                  className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500"
-                >
-                  Dashboard
-                </Link>
-                {isAdmin && (
-                  <Link
-                    to="/employees"
-                    className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500"
-                  >
-                    Empleados
-                  </Link>
-                )}
-                <Link
-                  to="/requests"
-                  className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500"
-                >
-                  Solicitudes
-                </Link>
+                <NavLink to="/dashboard">Dashboard</NavLink>
+                {isAdmin && <NavLink to="/Employees">Empleados</NavLink>}
+                <NavLink to="/Requests">Solicitudes</NavLink>
               </div>
             </div>
           </div>
           <div className="flex items-center">
             <div className="hidden md:block">
               <div className="flex items-center space-x-4">
-                {/* Información del usuario */}
                 <div className="flex flex-col items-end">
                   <span className="text-white text-sm">
-                    {auth?.user?.empleado?.nombre}{" "}
-                    {auth?.user?.empleado?.apellido}
+                    {auth?.user?.username}
                   </span>
                   <span className="text-indigo-200 text-xs">
                     {auth?.user?.rol.charAt(0).toUpperCase() +
                       auth?.user?.rol.slice(1)}
                   </span>
                 </div>
-                {/* Avatar del usuario */}
                 <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
-                    {auth?.user?.empleado?.nombre?.[0]?.toUpperCase() || "U"}
+                    {auth?.user?.username?.[0]?.toUpperCase() || "U"}
                   </span>
                 </div>
-                {/* Botón de cerrar sesión */}
                 <button
                   onClick={handleLogout}
                   className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 flex items-center"
