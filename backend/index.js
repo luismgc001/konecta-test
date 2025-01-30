@@ -21,10 +21,11 @@ app.use(limiter);
 app.use(sanitizeData);
 app.use(
   cors({
-    origin: "http://localhost:3001", // URL de tu frontend (ajusta el puerto según corresponda)
+    origin: ["http://localhost:3001"], // URL específica del frontend
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    optionsSuccessStatus: 200,
   })
 );
 app.use(express.json());

@@ -157,14 +157,27 @@ router.get("/stats", authMiddleware, async (req, res) => {
 // Ruta para solicitudes recientes
 router.get("/recientes", authMiddleware, async (req, res) => {
   try {
-    const query = `
-      SELECT s.*, e.nombre, e.apellido 
-      FROM solicitudes s 
-      JOIN empleados e ON s.empleado_id = e.id 
-      ORDER BY s.fecha_solicitud DESC 
-      LIMIT 5
-    `;
-    const result = await pool.query(query);
+    const isAdmin = req.user.rol === "administrador";
+
+    const query = isAdmin
+      ? `
+        SELECT s.*, e.nombre, e.apellido 
+        FROM solicitudes s 
+        JOIN empleados e ON s.empleado_id = e.id 
+        ORDER BY s.fecha_solicitud DESC 
+        LIMIT 5
+      `
+      : `
+        SELECT s.*, e.nombre, e.apellido 
+        FROM solicitudes s 
+        JOIN empleados e ON s.empleado_id = e.id 
+        WHERE e.usuario_id = $1
+        ORDER BY s.fecha_solicitud DESC 
+        LIMIT 5
+      `;
+
+    const values = isAdmin ? [] : [req.user.id];
+    const result = await pool.query(query, values);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: error.message });
