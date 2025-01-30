@@ -7,17 +7,26 @@ import RequestModal from "../components/RequestModal";
 const Requests = () => {
   const { auth } = useAuth();
   const isAdmin = auth?.user?.rol === "administrador";
-  const [allRequests, setAllRequests] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 0,
+    page: 1,
+    limit: 10,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState("all");
+  const [deleteLoading, setDeleteLoading] = useState(null);
 
   const fetchRequests = async () => {
     try {
-      const response = await api("/solicitudes");
-      setAllRequests(response || []);
+      setLoading(true);
+      const response = await api(`/solicitudes?page=${page}`);
+      setRequests(response.data);
+      setPagination(response.pagination);
     } catch (err) {
       setError("Error al cargar solicitudes");
     } finally {
@@ -27,22 +36,22 @@ const Requests = () => {
 
   useEffect(() => {
     fetchRequests();
-  }, [page]);
+  }, [page, viewMode]);
 
   const filteredRequests = useMemo(() => {
     if (!isAdmin || viewMode === "own") {
-      return allRequests.filter(
-        (request) => request.usuario_id === auth.user.id
-      );
+      return requests.filter((request) => request.usuario_id === auth.user.id);
     }
-    return allRequests;
-  }, [allRequests, viewMode, isAdmin, auth?.user?.id]);
+    return requests;
+  }, [requests, viewMode, isAdmin, auth?.user?.id]);
 
   const handleDelete = async (id) => {
     if (!isAdmin) return;
     if (!window.confirm("¿Está seguro que desea eliminar esta solicitud?")) {
       return;
     }
+
+    setDeleteLoading(id);
     try {
       await api(`/solicitudes/${id}`, {
         method: "DELETE",
@@ -50,6 +59,8 @@ const Requests = () => {
       fetchRequests();
     } catch (err) {
       setError("Error al eliminar solicitud");
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
@@ -240,9 +251,14 @@ const Requests = () => {
                   {isAdmin && (
                     <button
                       onClick={() => handleDelete(request.id)}
-                      className="text-red-600 hover:text-red-800"
+                      disabled={deleteLoading === request.id}
+                      className="text-red-600 hover:text-red-800 disabled:opacity-50"
                     >
-                      Eliminar
+                      {deleteLoading === request.id ? (
+                        <LoadingSpinner size="sm" />
+                      ) : (
+                        "Eliminar"
+                      )}
                     </button>
                   )}
                 </div>
@@ -251,6 +267,33 @@ const Requests = () => {
           )}
         </div>
       </div>
+
+      {/* Controles de paginación */}
+      {filteredRequests.length > 0 && viewMode === "all" && (
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <div className="flex justify-center space-x-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={page === 1}
+            >
+              Anterior
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={page >= pagination.totalPages}
+            >
+              Siguiente
+            </button>
+          </div>
+
+          <div className="text-sm text-gray-600">
+            Página {pagination.page} de {pagination.totalPages} (
+            {pagination.total} solicitudes)
+          </div>
+        </div>
+      )}
 
       <RequestModal
         isOpen={isModalOpen}
