@@ -4,30 +4,82 @@ const { authMiddleware, isAdmin } = require("../middlewares/auth.middleware");
 const pool = require("../config/database");
 
 // Obtener todas las solicitudes (accesible para todos los usuarios autenticados)
+// solicitudes.routes.js
+// En solicitudes.routes.js
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(`
-            SELECT s.*, e.nombre, e.apellido 
-            FROM solicitudes s 
-            JOIN empleados e ON s.empleado_id = e.id 
-            ORDER BY s.fecha_solicitud DESC
-        `);
+    const isAdmin = req.user.rol === "administrador";
+    let query;
+    let values = [];
+
+    if (isAdmin) {
+      query = `
+        SELECT s.*, e.nombre, e.apellido, e.usuario_id 
+        FROM solicitudes s 
+        JOIN empleados e ON s.empleado_id = e.id 
+        ORDER BY s.fecha_solicitud DESC
+      `;
+    } else {
+      query = `
+        SELECT s.*, e.nombre, e.apellido, e.usuario_id 
+        FROM solicitudes s 
+        JOIN empleados e ON s.empleado_id = e.id 
+        WHERE e.usuario_id = $1
+        ORDER BY s.fecha_solicitud DESC
+      `;
+      values = [req.user.id];
+    }
+
+    const result = await pool.query(query, values);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Crear nueva solicitud (accesible para todos los usuarios autenticados)
+// Crear nueva solicitud
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { empleado_id, tipo_solicitud, descripcion } = req.body;
+    const { tipo_solicitud, descripcion } = req.body;
+    console.log("Usuario autenticado id:", req.user.id);
+
+    // Primero obtenemos la información del empleado vinculado al usuario
+    const empleadoResult = await pool.query(
+      `SELECT id, usuario_id, nombre, apellido 
+       FROM empleados 
+       WHERE usuario_id = $1`,
+      [req.user.id]
+    );
+
+    if (empleadoResult.rows.length === 0) {
+      return res.status(404).json({ message: "Empleado no encontrado" });
+    }
+
+    // Usamos el id de la tabla empleados para la relación en solicitudes
+    const empleado_id = empleadoResult.rows[0].id;
+    console.log("ID empleado a insertar:", empleado_id);
+    console.log("usuario_id relacionado:", empleadoResult.rows[0].usuario_id);
+
     const result = await pool.query(
-      "INSERT INTO solicitudes (empleado_id, tipo_solicitud, descripcion) VALUES ($1, $2, $3) RETURNING *",
+      `INSERT INTO solicitudes (
+        empleado_id,
+        tipo_solicitud, 
+        descripcion
+      ) VALUES ($1, $2, $3) 
+      RETURNING *`,
       [empleado_id, tipo_solicitud, descripcion]
     );
-    res.status(201).json(result.rows[0]);
+
+    // Agregamos el nombre y apellido a la respuesta
+    const solicitudCreada = {
+      ...result.rows[0],
+      nombre: empleadoResult.rows[0].nombre,
+      apellido: empleadoResult.rows[0].apellido,
+    };
+
+    res.status(201).json(solicitudCreada);
   } catch (error) {
+    console.error("Error creando solicitud:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -46,6 +98,36 @@ router.delete("/:id", authMiddleware, isAdmin, async (req, res) => {
     }
 
     res.json({ message: "Solicitud eliminada exitosamente" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// solicitudes.routes.js
+// Actualizar estado de solicitud (solo administradores)
+router.patch("/:id/estado", authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    // Validar que el estado sea válido
+    if (!["pendiente", "aprobada", "rechazada"].includes(estado)) {
+      return res.status(400).json({ message: "Estado no válido" });
+    }
+
+    const result = await pool.query(
+      `UPDATE solicitudes 
+       SET estado = $1, fecha_resolucion = CURRENT_TIMESTAMP 
+       WHERE id = $2 
+       RETURNING *`,
+      [estado, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+
+    res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

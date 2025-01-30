@@ -74,6 +74,8 @@ router.get(
         pool.query(countQuery, search ? [queryParams[0]] : []),
       ]);
 
+      console.log(resultados);
+
       res.json({
         data: resultados.rows,
         pagination: {

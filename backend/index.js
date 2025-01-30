@@ -22,7 +22,7 @@ app.use(sanitizeData);
 app.use(
   cors({
     origin: "http://localhost:3001", // URL de tu frontend (ajusta el puerto según corresponda)
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })

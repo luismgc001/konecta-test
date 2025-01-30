@@ -1,37 +1,106 @@
+const pool = require("../config/database");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const pool = require("../config/database");
 
 const register = async (req, res) => {
   try {
-    const { username, password, rol } = req.body;
+    await pool.query("BEGIN");
 
-    // Verificar si el usuario ya existe
-    const userExists = await pool.query(
-      "SELECT * FROM usuarios WHERE username = $1",
-      [username]
-    );
+    const {
+      username,
+      password,
+      rol = rol || "empleado",
+      nombre,
+      apellido,
+      email,
+      telefono,
+      fecha_contratacion,
+      salario,
+    } = req.body;
 
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ message: "El usuario ya existe" });
+    const salarioNumerico = parseFloat(salario);
+    if (isNaN(salarioNumerico)) {
+      throw new Error("El salario debe ser un número válido");
     }
 
-    // Hashear la contraseña
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Verificaciones de existencia
+    const [userExists, emailExists] = await Promise.all([
+      pool.query("SELECT * FROM usuarios WHERE username = $1", [username]),
+      pool.query("SELECT * FROM empleados WHERE email = $1", [email]),
+    ]);
 
-    // Insertar nuevo usuario
-    const result = await pool.query(
-      "INSERT INTO usuarios (username, password, rol) VALUES ($1, $2, $3) RETURNING id, username, rol",
+    if (userExists.rows.length > 0) {
+      throw new Error("El nombre de usuario ya está en uso");
+    }
+
+    if (emailExists.rows.length > 0) {
+      throw new Error("El email ya está registrado");
+    }
+
+    // Hash de la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insertar usuario
+    const userResult = await pool.query(
+      `INSERT INTO usuarios (username, password, rol)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
       [username, hashedPassword, rol]
     );
 
+    const usuarioId = userResult.rows[0].id;
+    // Insertar empleado
+    const empleadoResult = await pool.query(
+      `INSERT INTO empleados (
+        usuario_id, nombre, apellido, 
+        email, telefono, fecha_contratacion,
+        salario
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *`,
+      [
+        usuarioId,
+        nombre,
+        apellido,
+        email,
+        telefono,
+        fecha_contratacion,
+        salarioNumerico,
+      ]
+    );
+
+    await pool.query("COMMIT");
+
+    // Generar token JWT
+    const token = jwt.sign(
+      {
+        id: usuarioId,
+        username,
+        rol,
+        empleadoId: empleadoResult.rows[0].id,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    // Responder con más detalles
     res.status(201).json({
       message: "Usuario registrado exitosamente",
-      user: result.rows[0],
+      token,
+      user: {
+        id: usuarioId,
+        username,
+        rol,
+        empleado: empleadoResult.rows[0],
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error en el registro:", error);
+    await pool.query("ROLLBACK");
+
+    res.status(400).json({
+      message: error.message || "Error al registrar el usuario",
+      error: error.toString(),
+    });
   }
 };
 
