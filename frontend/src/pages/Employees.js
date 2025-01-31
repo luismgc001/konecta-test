@@ -34,6 +34,7 @@ const Employees = () => {
 
   useEffect(() => {
     fetchEmployees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   if (loading) return <LoadingSpinner size="lg" />;

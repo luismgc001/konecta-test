@@ -36,6 +36,7 @@ const Requests = () => {
 
   useEffect(() => {
     fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, viewMode]);
 
   const filteredRequests = useMemo(() => {

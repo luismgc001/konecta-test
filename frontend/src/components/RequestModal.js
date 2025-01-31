@@ -1,4 +1,3 @@
-// components/RequestModal.js
 import React, { useState } from "react";
 import { api } from "../utils/api";
 
@@ -61,10 +60,14 @@ const RequestModal = ({ isOpen, onClose, onSuccess }) => {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="tipo_solicitud"
+              className="block text-sm font-medium text-gray-700"
+            >
               Tipo de Solicitud
             </label>
             <select
+              id="tipo_solicitud"
               name="tipo_solicitud"
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -80,10 +83,14 @@ const RequestModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="descripcion"
+              className="block text-sm font-medium text-gray-700"
+            >
               Descripción
             </label>
             <textarea
+              id="descripcion"
               name="descripcion"
               required
               rows={4}
