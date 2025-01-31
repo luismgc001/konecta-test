@@ -20,6 +20,19 @@ employee-management/
 
 ## Configuración del Entorno
 
+### Frontend
+## Usuarios
+Se crearon los siguientes usuarios para loguearse y probar la aplicacion.
+Usuario: administrador
+password: administrador
+rol: administrador
+
+Usuario: juan.barrera
+password: juan.barrera
+rol: empleado
+
+Los demas usuarios tambien se pueden loguear con nombre.apellido y contraseña nombre.apellido.
+
 ### Backend (.env)
 ## Variables de Entorno
 
