@@ -21,17 +21,11 @@ employee-management/
 ## Configuración del Entorno
 
 ### Backend (.env)
+## Variables de Entorno
 
-Crea un archivo `.env` en la carpeta `backend/` con las siguientes variables:
-
-```env
-# Servidor
-JWT_SECRET=0ae34fb2c91d471980ebf8e4f9ad2e8e42c1f2f9b5d6a6c372915c8c739e8962
-DB_PORT=5432
-DATABASE_URL="postgresql://postgres.nptnzladqyqdtpocjovu:nj0Z0h0Bp2fszV73@aws-0-us-east-1.pooler.supabase.com:5432/postgres?connect_timeout=600&pgbouncer=true&options=-c%20search_path%3Dkonecta,public"
-SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wdG56bGFkcXlxZHRwb2Nqb3Z1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNzU5NzE5NSwiZXhwIjoyMDUzMTczMTk1fQ.PQN9mNPd0Eplwun1t9TGj2fFHz1Nmq0eiedccGWJmKc
-NODE_ENV=development
-```
+El proyecto requiere de algunas variables de entorno para ejecutarse correctamente.
+Los valores específicos para estas variables se proporcionarán por correo junto con el enlace del repositorio.
+Se debe copiar el archivo .env en la carpeta backend.
 
 ### Base de Datos
 
