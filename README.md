@@ -154,6 +154,7 @@ npm test
 - Tests end-to-end para flujos críticos
 
 ## Seguridad
+- Por limitaciones de tiempo en el desarrollo de esta prueba técnica, se optó por una conexión directa a PostgreSQL. En un escenario real, habría implementado Prisma como ORM, tecnología con la que ya he trabajado en multiples proyectos, aprovechando sus ventajas de type safety, migraciones automáticas y modelado de datos declarativo.
 
 ### Autenticación y Autorización
 - **JWT**: Implementación de JSON Web Tokens para manejo seguro de sesiones.
