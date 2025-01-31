@@ -57,11 +57,11 @@ const register = async (req, res) => {
     ]);
 
     if (userExists.rows.length > 0) {
-      throw new Error("El nombre de usuario ya está en uso");
+      throw new Error(`El nombre de usuario ${username} ya está en uso`);
     }
 
     if (emailExists.rows.length > 0) {
-      throw new Error("El email ya está registrado");
+      throw new Error(`El email ${email} ya está registrado.`);
     }
 
     // Hash de la contraseña
