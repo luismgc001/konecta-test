@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { Link } from "react-router-dom";
-import RequestModal from "../components/RequestModal"; // Asegúrate de importar el modal correcto
+import RequestModal from "../components/RequestModal";
 
 const Dashboard = () => {
   const { auth } = useAuth();

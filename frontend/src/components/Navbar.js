@@ -20,7 +20,6 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  // Componente NavLink con estilos condicionales
   const NavLink = ({ to, children }) => (
     <Link
       to={to}

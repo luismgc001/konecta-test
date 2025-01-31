@@ -18,7 +18,7 @@ const app = express();
 // Middlewares
 app.use(
   cors({
-    origin: ["http://localhost:3001"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -47,12 +47,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Exportar app para pruebas
 module.exports = { app };
 
-// Solo iniciar el servidor si no estamos en modo test
 if (process.env.NODE_ENV !== "test") {
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
   });

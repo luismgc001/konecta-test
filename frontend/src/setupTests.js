@@ -1,7 +1,6 @@
 // src/setupTests.js
 import "@testing-library/jest-dom";
 
-// Opcional: Configuración global de pruebas
 beforeAll(() => {
   // Configuración global antes de todas las pruebas
 });
