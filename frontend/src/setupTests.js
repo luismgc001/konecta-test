@@ -1,15 +1,10 @@
 // src/setupTests.js
 import "@testing-library/jest-dom";
 
-beforeAll(() => {
-  // Configuración global antes de todas las pruebas
-});
+beforeAll(() => {});
 
-afterAll(() => {
-  // Limpieza global después de todas las pruebas
-});
+afterAll(() => {});
 
-// Silenciar warnings de consola específicos (opcional)
 const originalError = console.error;
 console.error = (...args) => {
   if (/Warning.*not wrapped in act/.test(args[0])) {

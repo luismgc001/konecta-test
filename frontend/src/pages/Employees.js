@@ -22,7 +22,6 @@ const Employees = () => {
   const fetchEmployees = async () => {
     try {
       const response = await api(`/empleados?page=${page}`);
-      console.log("RESPONSE: ", response);
       setEmployees(response.data);
       setPagination(response.pagination);
     } catch (err) {

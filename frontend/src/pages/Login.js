@@ -31,8 +31,6 @@ const Login = () => {
         method: "POST",
         body: JSON.stringify(formData),
       });
-      console.log("RESPONSE: ", response);
-
       login(response.token);
       navigate("/dashboard");
     } catch (err) {

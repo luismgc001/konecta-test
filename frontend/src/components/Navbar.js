@@ -8,8 +8,6 @@ const Navbar = () => {
   const location = useLocation();
   const isAdmin = auth?.user?.rol === "administrador";
 
-  console.log("NAV BAR: ", auth?.user);
-
   const handleLogout = () => {
     logout();
     navigate("/login");

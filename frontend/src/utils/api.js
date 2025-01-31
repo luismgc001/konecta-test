@@ -7,8 +7,6 @@ export const api = async (endpoint, options = {}) => {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  console.log("Dentro de api");
-
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -16,8 +14,6 @@ export const api = async (endpoint, options = {}) => {
       ...options.headers,
     },
   });
-  console.log("Dentro de api fetch", response);
-
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Something went wrong");
